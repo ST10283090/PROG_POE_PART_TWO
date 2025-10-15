@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Report Submitted";
+}
+
+<div class="container mt-5 text-center">
+    <h2 style="color: cadetblue">Thank You!</h2>
+    @*Positivty feedback implemented*@
+    @*<p class="lead">Your report has gone through succesfully. cough* snitch! cough*</p>*@
+    <p class="lead">Your report was successfully processed! Thank you for helping better the community!</p>
+    <h4>Your current rank: @TempData["UserRank"]</h4>
+    <hr class="my-4">
+    <p>
+        Someone from our team will get on the matter as soon as possible!
+    </p>
+
+    <a class="btn btn-primary mt-3" asp-controller="Home" asp-action="Index"
+       style="background-color: cadetblue; border-color: cadetblue;">
+        Back to Main Menu
+    </a>
+</div>

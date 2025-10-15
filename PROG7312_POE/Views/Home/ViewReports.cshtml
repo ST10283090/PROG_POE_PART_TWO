@@ -1,0 +1,59 @@
+﻿@model List<PROG7312_POE.Models.Report>
+
+@{
+    ViewData["Title"] = "All Submitted Reports";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center" style="color: cadetblue">@ViewData["Title"]</h2>
+
+    @if (!Model.Any())
+    {
+        <p class="text-center mt-4">Maybe try adding some? 🤦</p>
+    }
+    else
+    {
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Report ID</th>
+                    <th>Street Address</th>
+                    <th>Suburb</th>
+                    <th>City</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Attachment</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var report in Model)
+                {
+                    <tr>
+                        <td>@report.ReportId</td>
+                        <td>@report.StreetAddress</td>
+                        <td>@report.Suburb</td>
+                        <td>@report.City</td>
+                        <td>@report.ReportCategory</td>
+                        <td>@report.ReportDescription</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(report.ReportDocument))
+                            {
+                                <a href="@report.ReportDocument" target="_blank">View</a>
+                            }
+                            else
+                            {
+                                <span>No attached doc</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="text-center mt-4">
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index" style="background-color: cadetblue; border-color: cadetblue;">
+            Back to Main Menu
+        </a>
+    </div>
+</div>

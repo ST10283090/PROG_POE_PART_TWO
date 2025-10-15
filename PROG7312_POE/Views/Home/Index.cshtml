@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center mt-5">
+    <h1 class="display-4 fw-bold" style="color: cadetblue">Welcome to the Municipality App</h1>
+    <p class="lead">Where our servers are actually up to facilitate citizen reporting of issues and service requests.</p>
+    <div class="text-center mt-2">
+        <h4 style="color: cadetblue">
+            Your current rank: @ViewData["UserRank"]
+            <img src="~/images/ethemuni.png"
+                 style="width:24px; height:24px; cursor:pointer; vertical-align:middle;"
+                 title="
+             Rusty Rhino: Lowest Rank
+             Eager Elephant: Second Lowest Rank
+             Loyal Lion: Third Rank
+             Bold Buffalo: Second Highest Rank
+             Legendary Leopard: Highest Rank Achivable
+             " />
+        </h4>
+        <p class="text-muted">
+            Reports submitted this session: @ViewData["ReportCount"]
+        </p>
+    </div>
+
+    <hr class="my-4">
+    <p>Together WE Better.</p>
+    <hr class="my-4">
+    <a class="btn btn-lg mt-3"
+       asp-controller="Home"
+       asp-action="ReportIssues"
+       role="button"
+       style="background-color: cadetblue; border-color: cadetblue; color: white;">
+        Report an Issue
+    </a>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="color: cadetblue">Monthly Activity</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm border-0" style="background: linear-gradient(135deg, #cce7ff, #e6f2ff);">
+                <div class="card-body">
+                    <h5 id="activeReportsCounter" class="card-title display-6">120</h5>
+                    <p class="card-text">Active Reports</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm border-0" style="background: linear-gradient(135deg, #ffd9cc, #ffe6e6);">
+                <div class="card-body">
+                    <h5 class="card-title display-6">85</h5>
+                    <p class="card-text">Resolved Issues</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm border-0" style="background: linear-gradient(135deg, #d9ffd9, #e6ffee);">
+                <div class="card-body">
+                    <h5 class="card-title display-6">60</h5>
+                    <p class="card-text">Community Events</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*GPT FOR UI/AESTHETICS ONLY*@
+<style>
+    @@keyframes floatShape {
+        from {
+            transform: translate(-50%, -50%) translateY(0);
+        }
+
+        to {
+            transform: translate(-50%, -50%) translateY(-50px);
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const counters = {
+            active: document.getElementById('activeReportsCounter'),
+            resolved: document.querySelectorAll('.card-text')[1].previousElementSibling,
+            events: document.querySelectorAll('.card-text')[2].previousElementSibling
+        };
+
+        let activeReports = parseInt(localStorage.getItem('activeReports')) || 120;
+        let resolvedIssues = 85;
+        let communityEvents = 45;
+
+        function animateCounter(element, target, start = 0) {
+            let count = start;
+            element.innerText = count;
+            let interval = setInterval(() => {
+                count += Math.ceil(target / 60);
+                if (count >= target) {
+                    element.innerText = target;
+                    clearInterval(interval);
+                } else {
+                    element.innerText = count;
+                }
+            }, 20);
+        }
+
+        animateCounter(counters.active, activeReports);
+        animateCounter(counters.resolved, resolvedIssues);
+        animateCounter(counters.events, communityEvents);
+
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.top = 0;
+        container.style.left = 0;
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.overflow = 'hidden';
+        document.body.appendChild(container);
+
+        for (let i = 0; i < 15; i++) {
+            const shape = document.createElement('div');
+            shape.style.width = shape.style.height = Math.random() * 30 + 20 + 'px';
+            shape.style.background = `rgba(0, 123, 255, ${Math.random() * 0.3 + 0.2})`;
+            shape.style.position = 'absolute';
+            shape.style.borderRadius = '50%';
+            shape.style.top = Math.random() * 100 + '%';
+            shape.style.left = Math.random() * 100 + '%';
+            shape.style.transform = `translate(-50%, -50%)`;
+            shape.style.animation = `floatShape ${5 + Math.random() * 5}s ease-in-out infinite alternate`;
+            container.appendChild(shape);
+        }
+    </script>
+}

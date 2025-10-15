@@ -1,0 +1,88 @@
+﻿@using PROG7312_POE.Models
+@using PROG7312_POE.Controllers
+@{
+    ViewData["Title"] = "Local Events and Announcements";
+
+    var allEvents = ViewData["AllEvents"] as List<Event> ?? new List<Event>();
+    var searchResults = ViewData["SearchResults"] as List<Event> ?? allEvents;
+    var categories = ViewData["Categories"] as HashSet<string> ?? new HashSet<string>();
+    var recentSearches = ViewData["RecentSearches"] as List<string> ?? new List<string>();
+    var eventsDict = ViewData["Events"] as SortedDictionary<DateTime, List<Event>>
+                     ?? new SortedDictionary<DateTime, List<Event>>();
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4" style="color:cadetblue">Local Events and Announcements</h1>
+
+    <form asp-action="SearchEvents" method="post" class="row g-3 mb-5 justify-content-center">
+        <div class="col-md-4">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat">@cat</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="date" name="date" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </form>
+
+    <div class="row">
+        @foreach (var ev in searchResults)
+        {
+            <div class="col-md-5 mb-5">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">@ev.Title</h5>
+                        <h6 class="card-subtitle mb-3 text-muted">@ev.Category</h6>
+                        <p class="card-text">@ev.Description</p>
+                        <p class="card-text">
+                            <small class="text-muted">@ev.Date.ToString("dddd, MMM dd yyyy")</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (recentSearches.Any())
+    {
+        <hr />
+        <h3 style="color:cadetblue">Events you mifht like!</h3>
+        <div class="row">
+            @foreach (var cat in recentSearches)
+            {
+                var recs = eventsDict
+                .SelectMany(kvp => kvp.Value)
+                .Where(e => e.Category.Equals(cat, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(e => e.Date)
+                .Take(2)
+                .ToList();
+
+                if (recs.Any())
+                {
+                    foreach (var rec in recs)
+                    {
+                        <div class="col-md-5 mb-5">
+                            <div class="card h-100 border-light shadow-lg">
+                                <div class="card-body">
+                                    <h5 class="card-title">@rec.Title</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">@rec.Category</h6>
+                                    <p class="card-text">@rec.Description</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">@rec.Date.ToString("dddd, MMM dd yyyy")</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    }
+</div>

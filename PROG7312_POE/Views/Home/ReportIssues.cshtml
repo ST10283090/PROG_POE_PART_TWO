@@ -1,0 +1,96 @@
+﻿@model PROG7312_POE.Models.Report
+
+@{
+    ViewData["Title"] = "Report an Issue";
+}
+
+<div class="container mt-5" id="formContainer">
+    <h2 class="text-center" style="color: cadetblue">@ViewData["Title"]</h2>
+    <p class="text-center lead">Please enter all necessary fields before you submit this report. THANK YOU!</p>
+
+    <form id="reportForm" asp-action="ReportIssues" method="post" enctype="multipart/form-data" class="mt-4" novalidate>
+        @*Partone feeback*@
+        <div class="mb-3">
+            <label asp-for="StreetAddress" class="form-label" style="color:cadetblue">Street Address</label>
+            <input asp-for="StreetAddress" class="form-control" placeholder="Enter street address" />
+            <span asp-validation-for="StreetAddress" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Suburb" class="form-label" style="color:cadetblue">Suburb</label>
+            <input asp-for="Suburb" class="form-control" placeholder="Enter suburb" />
+            <span asp-validation-for="Suburb" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="City" class="form-label" style="color:cadetblue">City</label>
+            <input asp-for="City" class="form-control" placeholder="Enter city" />
+            <span asp-validation-for="City" class="text-danger"></span>
+        </div>
+
+
+        <div class="mb-3">
+            <label asp-for="ReportCategory" class="form-label" style="color:cadetblue">Category</label>
+            <select asp-for="ReportCategory" class="form-select">
+                <option selected disabled>Select a category</option>
+                <option value="Roadworks">Roadworks</option>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Staff Complaints">Staff Complaints</option>
+                <option value="Other">Other</option>
+            </select>
+            <span asp-validation-for="ReportCategory" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ReportDescription" class="form-label" style="color:cadetblue">Description</label>
+            <textarea asp-for="ReportDescription" class="form-control" rows="4" placeholder="Give us any additional details you have"></textarea>
+            <span asp-validation-for="ReportDescription" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Attachment" class="form-label" style="color:cadetblue">Attach a file (optional)</label>
+            <input class="form-control" type="file" id="Attachment" name="Attachment">
+        </div>
+
+        <div class="mb-3 text-center">
+            <span id="engagementMsg" class="text-muted" style="color:cadetblue">
+                Someone from our team will get on this as soon as possible!
+            </span>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Back to Main Menu</a>
+            <button type="submit" class="btn" style="background-color: cadetblue; border-color: cadetblue; color:white;">
+                Submit
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="processingSplash" style="display:none; text-align:center; margin-top:50px;">
+    <h3 style="color:cadetblue">Processing your report...</h3>
+    <p>Please wait a moment.</p>
+</div>
+
+@*makes the reports counter increase when a user make sone*@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const form = document.getElementById("reportForm");
+
+        form.addEventListener("submit", function (e) {
+            if (!form.checkValidity()) {
+                return;
+            }
+
+            document.getElementById("formContainer").style.display = "none";
+            document.getElementById("processingSplash").style.display = "block";
+
+            let activeReports = parseInt(localStorage.getItem('activeReports')) || 120;
+            activeReports += 1;
+            localStorage.setItem('activeReports', activeReports);
+        });
+    </script>
+}
+
