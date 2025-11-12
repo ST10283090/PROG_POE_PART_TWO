@@ -1,0 +1,116 @@
+﻿@{
+    ViewData["Title"] = "Service Requests Status";
+    var reports = ViewData["Reports"] as List<PROG7312_POE.Models.Report> ?? new List<PROG7312_POE.Models.Report>();
+    var searchId = ViewData["SearchId"] as string;
+    var searchResult = ViewData["SearchResult"] as PROG7312_POE.Models.Report;
+    var structureView = ViewData["StructureView"] as string;
+
+    bool searching = !string.IsNullOrEmpty(searchId) && searchId != "0";
+    bool found = searchResult != null;
+}
+
+<div class="container mt-5">
+
+    @* dynamic heading depending on whether or not the ID was found *@
+    <h2 class="text-center mb-4" style="color:@(searching ? (found ? "green" : "red") : "cadetblue")">
+        @(searching ? (found ? "Results Found" : "No Results Found") : "All Submitted Service Requests")
+    </h2>
+
+    <form asp-action="ServiceRequests" method="post" class="row g-3 mb-4 justify-content-center">
+        <div class="col-md-4">
+            <input type="text" name="searchId" class="form-control" placeholder="Enter 0 to see all Reported Issues" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn" style="background-color: cadetblue; border-color: cadetblue; color:white; width:100%;">
+                Track
+            </button>
+        </div>
+        <div class="col-md-6 text-end">
+            <button type="submit" formaction="/Home/ViewStructure" formmethod="post" name="structure" value="BST" class="btn btn-outline-secondary me-2">Street Number ASC</button>
+            <button type="submit" formaction="/Home/ViewStructure" formmethod="post" name="structure" value="AVL" class="btn btn-outline-secondary me-2">Category A → Z</button>
+            <button type="submit" formaction="/Home/ViewStructure" formmethod="post" name="structure" value="Heap" class="btn btn-outline-secondary me-2">Address Length ASC</button>
+            <button type="submit" formaction="/Home/ViewStructure" formmethod="post" name="structure" value="Graph" class="btn btn-outline-secondary">Latest Entries First</button>
+        </div>
+    </form>
+
+    @* started with table for all and table for search, ended up joining it for cleaner look *@
+    <table class="table table-striped table-hover mt-2">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Address</th>
+                <th>Suburb</th>
+                <th>City</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Attachment</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (searching)
+            {
+                if (found)
+                {
+                    <tr>
+                        <td>@searchResult.ReportId</td>
+                        <td>@searchResult.StreetAddress</td>
+                        <td>@searchResult.Suburb</td>
+                        <td>@searchResult.City</td>
+                        <td>@searchResult.ReportCategory</td>
+                        <td>@searchResult.ReportDescription</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(searchResult.ReportDocument))
+                            {
+                                <a href="@searchResult.ReportDocument" target="_blank">View</a>
+                            }
+                            else
+                            {
+                                <span>No attached doc</span>
+                            }
+                        </td>
+                        <td class="text-success fw-bold">In Progress</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                @foreach (var report in reports)
+                {
+                    <tr>
+                        <td>@report.ReportId</td>
+                        <td>@report.StreetAddress</td>
+                        <td>@report.Suburb</td>
+                        <td>@report.City</td>
+                        <td>@report.ReportCategory</td>
+                        <td>@report.ReportDescription</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(report.ReportDocument))
+                            {
+                                <a href="@report.ReportDocument" target="_blank">View</a>
+                            }
+                            else
+                            {
+                                <span>No attached doc</span>
+                            }
+                        </td>
+                        <td class="text-success fw-bold">In Progress</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    @* used to check if the structures were seeing the data before affecting the main table *@
+    @if (!string.IsNullOrEmpty(structureView))
+    {
+        <h4 class="mt-5" style="color: cadetblue">Data Structure Visualisation: @structureView</h4>
+        <pre class="bg-light p-3 border rounded">@ViewData["StructureData"]</pre>
+    }
+
+    <div class="text-center mt-4">
+        <a class="btn" asp-controller="Home" asp-action="Index" style="background-color: cadetblue; border-color: cadetblue; color:white;">
+            Back to Main Menu
+        </a>
+    </div>
+</div>

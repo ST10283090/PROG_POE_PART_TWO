@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PROG7312_POE.Models;
 using System.Diagnostics;
+using static PROG7312_POE.Models.DataStructures;
 
 namespace PROG7312_POE.Controllers
 {
@@ -15,6 +16,12 @@ namespace PROG7312_POE.Controllers
         private static SortedDictionary<DateTime, List<Event>> events = new SortedDictionary<DateTime, List<Event>>();
         private static HashSet<string> eventCategories = new HashSet<string>();
         private static Stack<string> recentSearches = new Stack<string>();
+        //part three
+        private static DataStructures.BST bst = new DataStructures.BST();
+        private static DataStructures.AVLTree avl = new DataStructures.AVLTree();
+        private static DataStructures.MinHeap heap = new DataStructures.MinHeap();
+        private static DataStructures.Graph graph = new DataStructures.Graph();
+        private static int _nextReportId = 1;
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -143,18 +150,83 @@ namespace PROG7312_POE.Controllers
             return View("LocalEventsandAnnouncements");
         }
 
-
-
         public IActionResult ServiceRequests()
         {
             ViewData["Title"] = "Service Requests Status";
+
+            var allReports = _reports.ToList(); 
+
+            ViewData["Reports"] = allReports;
+            ViewData["SearchId"] = 0;           
+            ViewData["SearchResult"] = null;    
+
             return View("ServiceRequestsStatus");
         }
 
-        public IActionResult ReportIssues()
+        [HttpPost]
+        public IActionResult ServiceRequests(string searchId)
         {
-            ViewData["Title"] = "Report an Issue";
-            return View();
+            int.TryParse(searchId, out int id);
+
+            var allReports = _reports.ToList();
+
+            Report searchResult = null;
+
+            if (id > 0)
+            {
+                searchResult = allReports.FirstOrDefault(r => r.ReportId == id);
+            }
+            else
+            {
+                searchResult = null; 
+            }
+
+            ViewData["Reports"] = allReports;
+            ViewData["SearchId"] = searchId;
+            ViewData["SearchResult"] = searchResult;
+
+            return View("ServiceRequestsStatus");
+        }
+
+        [HttpPost]
+        public IActionResult ViewStructure(string structure)
+        {
+            var allReports = _reports.ToList();
+            List<Report> sortedReports = new List<Report>();
+
+            switch (structure)
+            {
+                case "BST":
+                    // sortes by street number
+                    bst.InOrderTraversal(bst.Root, sortedReports);
+                    break;
+
+                case "AVL":
+                    // sorts by category, in alphabetucal order
+                    avl.InOrderTraversal(avl.Root, sortedReports);
+                    sortedReports = sortedReports.OrderBy(r => r.ReportCategory).ToList();
+                    break;
+
+                case "Heap":
+                    // shortest address first
+                    sortedReports = heap.ToList();
+                    sortedReports.Sort((a, b) => a.StreetAddress.Length.CompareTo(b.StreetAddress.Length));
+                    break;
+
+                case "Graph":
+                    // FILO, displays all issues reported from most recent to oldest
+                    sortedReports = allReports
+                        .OrderByDescending(r => r.ReportId)
+                        .ToList();
+                    break;
+            }
+
+            ViewData["Reports"] = sortedReports;
+            ViewData["StructureView"] = structure; 
+            ViewData["SearchId"] = "0";
+            ViewData["SearchResult"] = null;
+
+            return View("ServiceRequestsStatus");
         }
 
         [HttpPost]
@@ -162,6 +234,7 @@ namespace PROG7312_POE.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Handle file attachment
                 if (Attachment != null && Attachment.Length > 0)
                 {
                     var fileName = Path.GetFileName(Attachment.FileName);
@@ -175,7 +248,20 @@ namespace PROG7312_POE.Controllers
                     report.ReportDocument = "/uploads/" + fileName;
                 }
 
+                report.ReportId = _nextReportId++;
                 _reports.Add(report);
+                
+                // part three
+                bst.Insert(report);        // bst
+                avl.Insert(report);        // avl
+                heap.Insert(report);       // heap
+                graph.AddVertex(report.ReportId); // Graph 
+
+                if (_nextReportId > 2) 
+                {
+                    int prevReportId = _nextReportId - 2;
+                    graph.AddEdge(prevReportId, report.ReportId);
+                }
 
                 int reportCount = HttpContext.Session.GetInt32("ReportCount") ?? 0;
                 reportCount++;
@@ -201,6 +287,11 @@ namespace PROG7312_POE.Controllers
             return View(report);
         }
 
+        public IActionResult ReportIssues()
+        {
+            ViewData["Title"] = "Report an Issue";
+            return View();
+        }
 
         public IActionResult ReportSuccess()
         {
@@ -208,11 +299,12 @@ namespace PROG7312_POE.Controllers
             return View();
         }
 
-        public IActionResult ViewReports()
-        {
-            ViewData["Title"] = "All Submitted Reports";
-            return View(_reports.ToList());
-        }
+        //seemed redundant
+        //public IActionResult ViewReports()
+        //{
+        //    ViewData["Title"] = "All Submitted Reports";
+        //    return View(_reports.ToList());
+        //}
 
         public IActionResult Index()
         {
